@@ -1,4 +1,7 @@
+import random
 import numpy as np
+
+from collections import namedtuple, deque
 
 def epi_done(done):
     '''
@@ -76,5 +79,17 @@ class OnpolicyBatchReplay(OnpolicyReplay):
                 batch['next_actions'] = [0] * len(batch['states'])
         return batch
 
+class ReplayMemory:
+    def __init__(self, max_size, Transition):
+        self.max_size = max_size
+        self.Transition = Transition
+        self.memory = deque(maxlen = max_size)
 
-        
+    def push(self, *args):
+        self.memory.append(self.Transition(*args))
+
+    def sample(self, batch_size):
+        return random.sample(self.memory, batch_size)
+    
+    def __len__(self):
+        return len(self.memory)
