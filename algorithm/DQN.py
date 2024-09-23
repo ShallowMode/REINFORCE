@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
 import torch.nn.functional as F
 
 from utils import ReplayMemory
@@ -118,7 +119,9 @@ def main():
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            
+
+        plt.plot(Max_steps, total_reward, 'b')
+        plt.savefig("./save_graph/cartpole_DQN.png")    
         temperature = max(temperature_min, temperature * temperature_decay)
 
         if loss is not None:

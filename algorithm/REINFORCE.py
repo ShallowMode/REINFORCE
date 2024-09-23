@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torch.optim as optim
+import matplotlib.pyplot as plt
 
 from torch.distributions import Categorical
 
@@ -61,24 +62,30 @@ def train(pi, optimizer):
     return loss
 
 def main():
+    scores, episodes = [], []
     env = gym.make('CartPole-v1')
     in_dim = env.observation_space.shape[0]       # 4
     out_dim = env.action_space.n            # 2
     pi = Pi(in_dim, out_dim)
-    optimizer = optim.Adam(pi.parameters(), lr = 0.01)
+    optimizer = optim.Adam(pi.parameters(), lr = 0.002)
     for epi in range(500):
         state, _ = env.reset()
-        for t in range(300):
+        for t in range(200):
             action = pi.act(state)
             #print(env.step(action))
             next_state, reward, done, _, _= env.step(action)
             pi.rewards.append(reward)
+            state = next_state
             env.render()
             if done:
                 break
         loss = train(pi, optimizer)
         total_reward = sum(pi.rewards)
         solved = total_reward > 195.0
+        scores.append(total_reward)
+        episodes.append(epi)
+        plt.plot(episodes, scores, 'b')
+        plt.savefig("./save_graph/cartpole_Reinforce.png")
         pi.onpolicy_reset()                 # 활성정책이므로 훈련 이후 메모리 삭제
         print(f"Episode {epi}, loss: {loss}, \
               total_reward: {total_reward}, solved: {solved}")

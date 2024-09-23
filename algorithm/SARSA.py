@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
 
 from utils import OnpolicyBatchReplay
 from torch.distributions import Categorical
@@ -105,6 +106,7 @@ def main():
     batch_size = 32
     gamma = 0.99
     training_frequency = 300
+    scores, episodes = [], []
 
     for epi in range(500):
         state, _ = env.reset()
@@ -122,8 +124,13 @@ def main():
             if memory.size >= training_frequency:
                 loss = train(pi, optimizer, memory, batch_size, gamma)  # 수정된 부분
                 memory.reset()
-
+        
         epsilon = max(epsilon_min, epsilon * epsilon_decay)
+
+        scores.append(total_reward)
+        episodes.append(epi)
+        plt.plot(episodes, scores, 'b')
+        plt.savefig("./save_graph/cartpole_SARSA.png")
 
         if loss is not None:
             print(f"Episode {epi} - Total Reward: {total_reward}, Loss: {loss.item()}, Epsilon: {epsilon}")
